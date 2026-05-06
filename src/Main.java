@@ -1,8 +1,7 @@
-import org.w3c.dom.Node;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class Main {
 
@@ -27,8 +26,29 @@ public class Main {
         System.out.println();
 
         printTrackList();
+
+        Track selectedTrack = playerSelectTrack();
+        Car playerCar = playerSelectCar();
+        Car computerCar = computerSelectBest(playerCar, selectedTrack);
+
+        System.out.printf("> Computer Car    : [%d] %s (%s vs %s: +%d)%n",
+            computerCar.getId(),
+            computerCar.getNameAsString(),
+            computerCar.getTypeAsString(),
+            playerCar.getTypeAsString(),
+            getMatchupBonus(computerCar.getType(), playerCar.getType()));
+
+        Race race1a = new Race(playerCar, computerCar, selectedTrack);
+        Car winner1a = race1a.run();
+
+        trackList.deleteTrack(selectedTrack.getId());
+        System.out.printf("Status: [%d] %s is no longer available.%n",
+        selectedTrack.getId(),
+        selectedTrack.getNameAsString());
+
+        printTrackList();
     }
-    static void loadCars(String filename) {
+        static void loadCars(String filename) {
         int count = 0;
         try {
             BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -165,4 +185,79 @@ public class Main {
         }
         return bestCar;
     }
+
+    static Track playerSelectTrack(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\n-- Race 1a: Player vs Computer --");
+        System.out.println("[Pre-Race SELECTION]");
+        System.out.println("> Track Selections:  Priority by selected Player");
+        System.out.println();
+
+        sllNode current = trackList.getHead();
+        while(current != null){
+            Track track = (Track) current.getData();
+                System.out.printf("  [%d] %s (Type: %s, Boost: %d)%n",
+                        track.getId(),
+                        track.getNameAsString(),
+                        track.getTypeAsString(),
+                        track.getBoost());
+                current = current.getLink();
+        }
+
+        System.out.print("Select a track by ID: ");
+        int trackId = scanner.nextInt();
+        current = trackList.getHead();
+        while(current != null){
+            Track track = (Track) current.getData();
+            if(track.getId() == trackId){
+                System.out.printf("> Selected Track  : [%d] %s (%s | Boost: +%d)%n",
+                    track.getId(),
+                    track.getNameAsString(),
+                    track.getTypeAsString(),
+                    track.getBoost());
+            return track;
+            }
+            current = current.getLink();
+        }
+
+        System.out.println("Invalid track ID. Please try again.");
+        return playerSelectTrack();
+                              
+    }
+
+    static Car playerSelectCar(){
+        Scanner scanner = new Scanner(System.in);
+        sllNode current = carList.getHead();
+        while(current!= null){
+            Car car = (Car) current.getData();
+            if(car.isActive()){
+                System.out.printf("  [%d] %s (Score: %d, Type: %s)%n",
+                        car.getId(),
+                        car.getNameAsString(),
+                        car.getPerformanceScore(),
+                        car.getTypeAsString());
+            }
+            current = current.getLink();
+        }
+
+        System.out.print("Select a car by ID: ");
+        int carId = scanner.nextInt();
+        current = carList.getHead();
+        while(current != null){
+            Car car = (Car) current.getData();
+            if(car.getId() == carId && car.isActive()){
+                System.out.printf("> Selected Car    : [%d] %s (Score: %d   | Type: %s)%n",
+                        car.getId(),
+                        car.getNameAsString(),
+                        car.getPerformanceScore(),
+                        car.getTypeAsString());
+                return car;     
+            }
+            current = current.getLink();
+        }
+
+        System.out.println("Invalid car ID or car is inactive. Please try again.");
+        return (Car) carList.getHead().getData();
+    }
+
 }

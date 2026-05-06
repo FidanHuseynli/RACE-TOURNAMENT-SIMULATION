@@ -1,4 +1,3 @@
-import org.w3c.dom.Node;
 
 public class SingleLinkedList {
     sllNode head;
@@ -86,6 +85,34 @@ public class SingleLinkedList {
 
     public sllNode getHead() {
         return head;
+    }
+
+    public void deleteTrack(int trackId){
+        if(head == null){
+            System.out.println("Track list is empty.");
+            return;
+        }
+
+        while (head != null && ((Track) head.getData()).getId() == trackId) {
+        head = head.getLink();
+        }
+
+        if (head == null) {
+            return;
+        }
+
+        sllNode temp = head;
+        sllNode previous = null;
+        while(temp != null){
+            if (((Track) temp.getData()).getId() == trackId) {
+            previous.setLink(temp.getLink());
+            } else {
+            previous = temp;
+            }
+        temp = temp.getLink();
+        }
+
+        
     }
 
 

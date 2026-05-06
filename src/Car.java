@@ -7,6 +7,7 @@ public class Car {
     private boolean isActive;
     private int currentPosition;
     private int iterationCount;
+    private int teleportCount = 0;
 
     public Car(int id, char[] name, int performanceScore, char[] type){
         this.id = id;
@@ -69,9 +70,18 @@ public class Car {
         this.iterationCount++;
     }
 
-    public void resetForRace() {
+    public void reset4Race() {
         this.currentScore = this.performanceScore;
         this.currentPosition = 1;
         this.iterationCount = 0;
+        this.teleportCount = 0;
+    }
+
+    public int getTeleportCount() { 
+        return teleportCount; 
+    }
+
+    public void incrementTeleportCount() { 
+        teleportCount++; 
     }
 }
