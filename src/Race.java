@@ -6,6 +6,9 @@ public class Race{
     private Track track;
     private DoubleLinkedList raceTrack;
     private Random rnd;
+    private SingleLinkedList stepLog1;
+    private SingleLinkedList stepLog2;
+    private int totalIterations;
     
     public Race(Car car1, Car car2, Track track){
         this.car1 = car1;
@@ -20,6 +23,10 @@ public class Race{
         car2.setCurrentScore(calculateInitialScore(car2, car1));
 
         raceTrack.buildTrack();
+
+        this.stepLog1 = new SingleLinkedList();
+        this.stepLog2 = new SingleLinkedList();
+        this.totalIterations = 0;
     }
 
     private int calculateInitialScore(Car car, Car opponent) {
@@ -82,6 +89,8 @@ public class Race{
             }
         }
 
+        totalIterations = iteration;
+
         System.out.println("+------+--------------------------------+--------------------------------+");
         System.out.printf("%nResult: %s wins in %d steps.%n",
                 winner.getNameAsString(), iteration);
@@ -97,7 +106,21 @@ public class Race{
 
         car.setCurrentScore(car.getCurrentScore() - (steps * 5));
 
-        TrackUnit unit = (TrackUnit) raceTrack.getNode(newPos).getData();
+        dllNode node = raceTrack.getNode(newPos);
+        if (node == null) {  // ← bunu ekle
+        car.setCurrentPosition(newPos);
+
+        int[] result = new int[]{startPos, newPos, newPos, 0, 0}; 
+        if (car == car1) {
+        stepLog1.insertEnd(result.clone());
+        } else {
+        stepLog2.insertEnd(result.clone());
+}
+        car.incrementIteration();
+        return new int[]{startPos, newPos, newPos, 0, 0};
+        }
+
+        TrackUnit unit = (TrackUnit) node.getData();
         int effectType = 0;
         int finalPos = newPos;
         int teleportCount = 0;
@@ -163,6 +186,16 @@ public class Race{
 
     public Track getTrack() { 
         return track;
+        }
+
+        public SingleLinkedList getStepLog1() { 
+            return stepLog1; 
+        }
+        public SingleLinkedList getStepLog2() {
+            return stepLog2; 
+        }
+        public int getTotalIterations() { 
+            return totalIterations; 
         }
 
 

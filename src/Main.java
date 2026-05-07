@@ -1,12 +1,14 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
 
     static SingleLinkedList carList = new SingleLinkedList();
     static SingleLinkedList trackList = new SingleLinkedList();
+    static SingleLinkedList raceLog = new SingleLinkedList();
 
     public static void main(String[] args) {
 
@@ -41,12 +43,173 @@ public class Main {
         Race race1a = new Race(playerCar, computerCar, selectedTrack);
         Car winner1a = race1a.run();
 
+        RaceLog entry1a = new RaceLog("1a".toCharArray(),
+            selectedTrack.getName(),
+            playerCar.getName(),
+            computerCar.getName(),
+            winner1a.getName(),
+            race1a.getTotalIterations()
+        );
+        entry1a.setStepLog1(race1a.getStepLog1());
+        entry1a.setStepLog2(race1a.getStepLog2());
+        raceLog.insertEnd(entry1a);
+
         trackList.deleteTrack(selectedTrack.getId());
         System.out.printf("Status: [%d] %s is no longer available.%n",
         selectedTrack.getId(),
         selectedTrack.getNameAsString());
+        printTrackList();
+
+        SingleLinkedList remainingCars = new SingleLinkedList();
+        sllNode current = carList.getHead();
+        while(current != null){
+            Car car = (Car) current.getData();
+            if( car.getId() != playerCar.getId() && car.getId() != computerCar.getId()){
+                remainingCars.insertEnd(car);
+            }
+            current = current.getLink();
+        }
+
+        Random rnd = new Random();
+        int size = remainingCars.size();
+        int pick1 = rnd.nextInt(size);
+        int pick2;
+
+        do{
+            pick2 = rnd.nextInt(size);
+        } while(pick2 == pick1);
+
+        Car compA = null;
+        Car compB = null; 
+        sllNode temp = remainingCars.getHead();
+        int index = 0;
+        
+        while(temp != null){
+            Car car = (Car) temp.getData();
+            if(index == pick1)
+                compA = car;
+            else if(index == pick2)
+                compB = car;
+            else 
+                car.setActive(false);
+            index++;
+            temp = temp.getLink();  
+        }
+
+        int trackSize = trackList.size();
+        int trackPick = rnd.nextInt(trackSize);
+        sllNode tempT = trackList.getHead();
+        int indexT = 0;
+        Track race1bT = null;
+
+        while(tempT != null){
+            if(indexT == trackPick){
+                race1bT = (Track) tempT.getData();
+                break;
+            }
+            indexT++;
+            tempT = tempT.getLink();
+        }
+
+        System.out.println("\n-- Race 1b: Computer vs Computer --");
+        System.out.println("[PRE-RACE SELECTION]");
+        System.out.println("> Track Selection : Random Assignment");
+        System.out.printf("> Selected Track  : [%d] %s (%s | Boost: +%d)%n",
+        race1bT.getId(),
+        race1bT.getNameAsString(),
+        race1bT.getTypeAsString(),
+        race1bT.getBoost());
+        System.out.printf("> Computer Car A  : [%d] %s (%s)%n",
+        compA.getId(),
+        compA.getNameAsString(),
+        compA.getTypeAsString());
+        System.out.printf("> Computer Car B  : [%d] %s (%s)%n",
+        compB.getId(),
+        compB.getNameAsString(),
+        compB.getTypeAsString());
+
+        Race race1b = new Race(compA, compB, race1bT);
+        Car winner1b = race1b.run();
+
+     
+        
+
+    
+
+        trackList.deleteTrack(race1bT.getId());
+        System.out.printf("Status: [%d] %s is no longer available.%n",
+        race1bT.getId(),
+        race1bT.getNameAsString());
+
+        RaceLog entry1b = new RaceLog("1b".toCharArray(),
+            race1bT.getName(),
+            compA.getName(),
+            compB.getName(),
+            winner1b.getName(),
+            race1b.getTotalIterations()
+        );
+
+        entry1b.setStepLog1(race1b.getStepLog1());
+        entry1b.setStepLog2(race1b.getStepLog2());
+        raceLog.insertEnd(entry1b);
 
         printTrackList();
+
+        Track finalT;
+        System.out.println("\n======================================================================");
+        System.out.println(" FINAL RACE");
+        System.out.println("======================================================================");
+
+        if (winner1a == playerCar) {
+        finalT = playerSelectTrack();
+} else {
+    // Bilgisayar kazandıysa random seç
+    int finalTrackSize = trackList.size();
+    int finalTrackPick = new Random().nextInt(finalTrackSize);
+    sllNode finalTemp = trackList.getHead();
+    int finalIndex = 0;
+    finalT = null;
+    while (finalTemp != null) {
+        if (finalIndex == finalTrackPick) {
+            finalT = (Track) finalTemp.getData();
+            break;
+        }
+        finalIndex++;
+        finalTemp = finalTemp.getLink();
+    }
+        System.out.println("\n-- " + winner1a.getNameAsString() + " vs " + winner1b.getNameAsString() + " --");
+        System.out.println("[PRE-RACE SELECTION]");
+        System.out.println("> Track Selection : Random Assignment");
+        System.out.printf("> Selected Track  : [%d] %s (%s | Boost: +%d)%n",
+        finalT.getId(),
+        finalT.getNameAsString(),
+        finalT.getTypeAsString(),
+        finalT.getBoost());
+}
+
+        Race finalRace = new Race(winner1a, winner1b, finalT);
+        Car champion = finalRace.run();
+
+        RaceLog entryFinal = new RaceLog("Final".toCharArray(),
+            finalT.getName(),
+            winner1a.getName(),
+            winner1b.getName(),
+            champion.getName(),
+            finalRace.getTotalIterations()
+        );
+        entryFinal.setStepLog1(finalRace.getStepLog1());
+        entryFinal.setStepLog2(finalRace.getStepLog2());
+        raceLog.insertEnd(entryFinal);
+
+        trackList.deleteTrack(finalT.getId());
+        System.out.printf("Status: [%d] %s is no longer available.%n",
+        finalT.getId(),
+        finalT.getNameAsString());
+        printTrackList();
+
+        System.out.println("\n======================================================================");
+        System.out.printf(" TOURNAMENT CHAMPION: %s%n", champion.getNameAsString());
+        System.out.println("======================================================================");
     }
         static void loadCars(String filename) {
         int count = 0;
@@ -258,6 +421,15 @@ public class Main {
 
         System.out.println("Invalid car ID or car is inactive. Please try again.");
         return (Car) carList.getHead().getData();
+
+
+        
+        
     }
+
+        
+
+    
+   
 
 }
