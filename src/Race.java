@@ -98,32 +98,21 @@ public class Race{
         return winner;
     }
 
-    private int[] calculateMove(Car car) {
-        int startPos = car.getCurrentPosition();
-        int steps = rnd.nextInt(3) + 1;
-        int newPos = startPos + steps;
-        if (newPos > 50) newPos = 50;
+    private int[] calculateMove(Car car) {int startPos = car.getCurrentPosition();
+    int steps = rnd.nextInt(3) + 1;
+    int newPos = startPos + steps;
+    if (newPos > 50) newPos = 50;
 
-        car.setCurrentScore(car.getCurrentScore() - (steps * 5));
+    car.setCurrentScore(car.getCurrentScore() - (steps * 5));
 
-        dllNode node = raceTrack.getNode(newPos);
-        if (node == null) {  // ← bunu ekle
-        car.setCurrentPosition(newPos);
+    dllNode node = raceTrack.getNode(newPos);
 
-        int[] result = new int[]{startPos, newPos, newPos, 0, 0}; 
-        if (car == car1) {
-        stepLog1.insertEnd(result.clone());
-        } else {
-        stepLog2.insertEnd(result.clone());
-}
-        car.incrementIteration();
-        return new int[]{startPos, newPos, newPos, 0, 0};
-        }
+    int effectType = 0;
+    int finalPos = newPos;
+    int teleportCount = 0;
 
+    if (node != null) {
         TrackUnit unit = (TrackUnit) node.getData();
-        int effectType = 0;
-        int finalPos = newPos;
-        int teleportCount = 0;
 
         if (new String(unit.getEffect()).equals("TELEPORT")) {
             effectType = 1;
@@ -139,12 +128,17 @@ public class Race{
             finalPos = 1;
             car.setCurrentScore(car.getCurrentScore() - 5);
         }
-
-        car.setCurrentPosition(finalPos);
-        car.incrementIteration();
-
-        return new int[]{startPos, newPos, finalPos, effectType, teleportCount};
     }
+
+    car.setCurrentPosition(finalPos);
+    car.incrementIteration();
+
+    int[] result = new int[]{startPos, newPos, finalPos, effectType, teleportCount};
+    if (car == car1) stepLog1.insertEnd(result);
+    else stepLog2.insertEnd(result);
+
+    return result;
+}
 
     private void printMove(int[] result, int columnWidth) {
         int startPos      = result[0];

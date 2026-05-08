@@ -41,7 +41,12 @@ public class RaceLog {
     public SingleLinkedList getStepLog() { 
         return stepLog; 
     }
-
+    public SingleLinkedList getStepLog1() { 
+    return stepLog1; 
+    }
+    public SingleLinkedList getStepLog2() { 
+    return stepLog2; 
+    }
     public void setStepLog1(SingleLinkedList log) { 
         this.stepLog1 = log; 
     }

@@ -162,21 +162,21 @@ public class Main {
 
         if (winner1a == playerCar) {
         finalT = playerSelectTrack();
-} else {
-    // Bilgisayar kazandıysa random seç
-    int finalTrackSize = trackList.size();
-    int finalTrackPick = new Random().nextInt(finalTrackSize);
-    sllNode finalTemp = trackList.getHead();
-    int finalIndex = 0;
-    finalT = null;
-    while (finalTemp != null) {
-        if (finalIndex == finalTrackPick) {
+        } else {
+
+        int finalTrackSize = trackList.size();
+        int finalTrackPick = new Random().nextInt(finalTrackSize);
+        sllNode finalTemp = trackList.getHead();
+        int finalIndex = 0;
+        finalT = null;
+        while (finalTemp != null) {
+            if (finalIndex == finalTrackPick) {
             finalT = (Track) finalTemp.getData();
             break;
+            }
+            finalIndex++;
+            finalTemp = finalTemp.getLink();
         }
-        finalIndex++;
-        finalTemp = finalTemp.getLink();
-    }
         System.out.println("\n-- " + winner1a.getNameAsString() + " vs " + winner1b.getNameAsString() + " --");
         System.out.println("[PRE-RACE SELECTION]");
         System.out.println("> Track Selection : Random Assignment");
@@ -210,6 +210,7 @@ public class Main {
         System.out.println("\n======================================================================");
         System.out.printf(" TOURNAMENT CHAMPION: %s%n", champion.getNameAsString());
         System.out.println("======================================================================");
+        printRaceLog();
     }
         static void loadCars(String filename) {
         int count = 0;
@@ -235,6 +236,7 @@ public class Main {
             System.out.println("Hata: " + filename + " okunamadi.");
         }
         System.out.printf("  . Loading Car Data   ................................ [ OK ] %d found%n", count);
+
     }
 
     static void loadTracks(String filename) {
@@ -421,15 +423,116 @@ public class Main {
 
         System.out.println("Invalid car ID or car is inactive. Please try again.");
         return (Car) carList.getHead().getData();
-
-
-        
         
     }
 
-        
+    static void printRaceLog(){
+        System.out.println("\n======================================================================");
+        System.out.println(" RACE LOG");
+        System.out.println("======================================================================");
 
+        sllNode current = raceLog.getHead();
+        int entryNumber = 1;
+
+       
+
+
+        while(current != null){
+            RaceLog  entry = (RaceLog) current.getData();
+
+            boolean car1IsWinner = new String(entry.getWinnerName()).equals(new String(entry.getCar1Name()));
+
+             System.out.printf("%n[ ENTRY %d ] Race %s: %s%n", entryNumber,
+                new String(entry.getRaceId()),
+                new String(entry.getRaceId()).equals("Final") ? "Final Race" : 
+                new String(entry.getRaceId()).equals("1a") ? "Player vs Computer" : "Computer vs Computer");
+
+            System.out.printf("            Track: %s%n", new String(entry.getTrackName()));
+            System.out.printf("            Matchup: %s vs %s%n",
+                new String(entry.getCar1Name()),
+                new String(entry.getCar2Name()));
+            System.out.printf("            Winner: %s%n", new String(entry.getWinnerName()));
+
+            System.out.println("    |");
+            System.out.println("    V");
+
+            System.out.printf("%-4s | %-30s | %-30s%n", "Step",
+                new String(entry.getCar1Name()),
+                new String(entry.getCar2Name()));
+            System.out.println("-----+--------------------------------+--------------------------------");
     
-   
+            sllNode step1 = entry.getStepLog1().getHead();
+            sllNode step2 = entry.getStepLog2().getHead();
+            int stepNumber = 1;
+            int total = entry.getTotalSteps();
+            while (step1 != null || step2 != null) {
+            boolean skip = stepNumber > 3 && stepNumber < total - 1;
+
+            if (skip) {
+                if (stepNumber == 4) {
+                    System.out.printf(" ... | [Steps 04-%02d skipped]%n", total - 2);
+                }
+                step1 = step1 != null ? step1.getLink() : null;
+                step2 = step2 != null ? step2.getLink() : null;
+                stepNumber++;
+                continue;
+            }
+
+            System.out.printf(" %02d  | ", stepNumber);
+
+            if (step1 != null) {
+                int[] s1data = (int[]) step1.getData();
+                printLogMove(s1data, s1data[2] >= 50);
+            } else {
+            System.out.printf("%-30s", "");
+            }
+
+            System.out.print(" | ");
+
+           if (step2 != null) {
+                int[] s2data = (int[]) step2.getData();
+                boolean isFinish = s2data[2] >= 50 || (stepNumber == total && !car1IsWinner);
+                printLogMove(s2data, isFinish);
+            } else {
+                System.out.printf("%-30s", "");
+}
+
+            System.out.println();
+
+
+            step1 = step1 != null ? step1.getLink() : null;
+            step2 = step2 != null ? step2.getLink() : null;
+            stepNumber++;
+        }
+            System.out.println("-----+--------------------------------+--------------------------------");
+            System.out.println("=".repeat(70));
+
+            entryNumber++;
+            current = current.getLink();
+
+        }
+      
+    }
+
+    static void printLogMove(int[] result, boolean isWinner) {
+        int startPos   = result[0];
+        int newPos     = result[1];
+        int finalPos   = result[2];
+        int effectType = result[3];
+        int teleportCount = result[4];
+
+        System.out.printf("Pos %02d -> %02d", startPos, newPos);
+
+        if (effectType == 1) {
+            System.out.printf(" (Boost %d) -> %02d", teleportCount, finalPos);
+        } else if (effectType == 2) {
+            System.out.print(" (Reset Trap) -> 01");
+        }
+
+        if (isWinner || finalPos >= 50) {
+            System.out.print(" (Finish)");
+        }
+    }
+
 
 }

@@ -32,4 +32,5 @@ public class Track {
     public int getBoost() {
         return boost;
     }
+
 }
